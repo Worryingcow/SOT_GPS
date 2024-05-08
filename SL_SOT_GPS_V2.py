@@ -8,9 +8,7 @@ Created on Wed May  8 15:24:36 2024
 
 import streamlit as st
 import math
-import matplotlib.pyplot as plt
 import pandas as pd
-import matplotlib.image as mpimg
 
 # Initialize logging
 # logging.basicConfig(level=logging.INFO)
