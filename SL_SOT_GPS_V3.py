@@ -328,6 +328,6 @@ else:
 
 
     # Plot with background
-    background_image_path = '/Users/thomasminahan/SOT_OUTPOSTS_GPS/SOT_MAP_NO_BOARDERS.png'
+    background_image_path = 'https://github.com/Worryingcow/SOT_GPS/blob/985390c4e47d3114f89085747d05410939dfcf3e/SOT_MAP_NO_BOARDERS.png'
     st.write("### Fastest Routes Plot with Background")
     plot_selected_routes_with_background(fastest_turning_routes, background_image_path, D)
