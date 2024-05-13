@@ -16,6 +16,12 @@ import urllib.request
 import io
 from urllib.parse import quote
 
+
+#Stable version with choice
+#Im attempting to add sliders again
+
+
+
 # Ship Speed DataFrame
 shipclasses = pd.DataFrame({
     'class': ['Sloop', 'Brig', 'Gally'],
@@ -25,7 +31,11 @@ shipclasses = pd.DataFrame({
 })
 
 # Ship Type Mapping
-Chosen_SHIP = {"S": 1, "B": 2, "G": 3}
+Chosen_SHIP = {
+    "Sloop": 1,
+    "Brigantine": 2,  # Corrected spelling
+    "Galleon": 3
+}
 
 # Wind Directions
 wind_directions = {
@@ -114,7 +124,102 @@ Destinations = {
     ]
 }
 
+Islands = {
+    "Ancient Spires Outpost": [("Ancient Spires Outpost", ("Q", 17))],
+    "Dagger Tooth Outpost": [("Dagger Tooth Outpost", ("M", 8))],
+    "Galleon's Grave Outpost": [("Galleon's Grave Outpost", ("R", 8))],
+    "Golden Sands Outpost": [("Golden Sands Outpost", ("D", 10))],
+    "Morrow's Peak Outpost": [("Morrow's Peak Outpost", ("V", 17))],
+    "Plunder Outpost": [("Plunder Outpost", ("J", 18))],
+    "Sanctuary Outpost": [("Sanctuary Outpost", ("F", 7))],
+    "Brian's Bazaar": [("Brian's Bazaar", ("Y", 12))],
+    "Roaring Traders": [("Roaring Traders", ("U", 20))],
+    "Stephen's Spoils": [("Stephen's Spoils", ("L", 15))],
+    "The Finest Trading Post": [("The Finest Trading Post", ("F", 17))],
+    "The North Star Seapost": [("The North Star Seapost", ("H", 10))],
+    "The Spoils of Plenty Store": [("The Spoils of Plenty Store", ("B", 7))],
+    "The Wild Treasures Store": [("The Wild Treasures Store", ("O", 4))],
+    "Three Paces East Seapost": [("Three Paces East Seapost", ("S", 9))],
+    "Barnacle Cay": [("Barnacle Cay", ("O", 15))],
+    "Black Sand Atoll": [("Black Sand Atoll", ("O", 3))],
+    "Black Water Enclave": [("Black Water Enclave", ("R", 5))],
+    "Blind Man's Lagoon": [("Blind Man's Lagoon", ("N", 6))],
+    "Booty Isle": [("Booty Isle", ("K", 20))],
+    "Boulder Cay": [("Boulder Cay", ("G", 5))],
+    "Brimstone Rock": [("Brimstone Rock", ("X", 18))],
+    "Castaway Isle": [("Castaway Isle", ("K", 14))],
+    "Chicken Isle": [("Chicken Isle", ("I", 16))],
+    "Cinder Islet": [("Cinder Islet", ("U", 14))],
+    "Cursewater Shores": [("Cursewater Shores", ("Y", 13))],
+    "Cutlass Cay": [("Cutlass Cay", ("M", 18))],
+    "Flame's End": [("Flame's End", ("V", 19))],
+    "Fools Lagoon": [("Fools Lagoon", ("I", 14))],
+    "Glowstone Cay": [("Glowstone Cay", ("Z", 18))],
+    "Isle of Last Words": [("Isle of Last Words", ("O", 9))],
+    "Lagoon of Whispers": [("Lagoon of Whispers", ("D", 12))],
+    "Liar's Backbone": [("Liar's Backbone", ("S", 11))],
+    "Lonely Isle": [("Lonely Isle", ("G", 8))],
+    "Lookout Point": [("Lookout Point", ("I", 20))],
+    "Magma's Tide": [("Magma's Tide", ("Y", 20))],
+    "Mutineer Rock": [("Mutineer Rock", ("N", 19))],
+    "Old Salts Atoll": [("Old Salts Atoll", ("F", 18))],
+    "Paradise Spring": [("Paradise Spring", ("L", 17))],
+    "Picaroon Palms": [("Picaroon Palms", ("I", 4))],
+    "Plunderer's Plight": [("Plunderer's Plight", ("Q", 6))],
+    "Rapier Cay": [("Rapier Cay", ("D", 8))],
+    "Roaring Sands": [("Roaring Sands", ("U", 21))],
+    "Rum Runner Isle": [("Rum Runner Isle", ("H", 9))],
+    "Salty Sands": [("Salty Sands", ("G", 3))],
+    "Sandy Shallows": [("Sandy Shallows", ("D", 5))],
+    "Schored Pass": [("Schored Pass", ("X", 11))],
+    "Scurvy Isley": [("Scurvy Isley", ("K", 4))],
+    "Sea Dog's Rest": [("Sea Dog's Rest", ("C", 11))],
+    "Shark Tooth Key": [("Shark Tooth Key", ("P", 13))],
+    "Shiver Retreat": [("Shiver Retreat", ("Q", 11))],
+    "The Forsaken Brink": [("The Forsaken Brink", ("U", 16))],
+    "Tribute Peak": [("Tribute Peak", ("Y", 2))],
+    "Tri-Rock Isle": [("Tri-Rock Isle", ("R", 10))],
+    "Twin Groves": [("Twin Groves", ("H", 11))],
+    "Ashen Reaches": [("Ashen Reaches", ("V", 23))],
+    "Cannon Cove": [("Cannon Cove", ("G", 10))],
+    "Crescent Isle": [("Crescent Isle", ("B", 9))],
+    "Crook's Hollow": [("Crook's Hollow", ("M", 16))],
+    "Devil's Ridge": [("Devil's Ridge", ("P", 19))],
+    "Discovery Ridge": [("Discovery Ridge", ("E", 17))],
+    "Fetcher's Rest": [("Fetcher's Rest", ("V", 12))],
+    "Flintlock Peninsula": [("Flintlock Peninsula", ("W", 14))],
+    "Kraken's Fall": [("Kraken's Fall", ("R", 12))],
+    "Lone Cove": [("Lone Cove", ("H", 6))],
+    "Marauder's Arch": [("Marauder's Arch", ("Q", 3))],
+    "Mermaid's Hideaway": [("Mermaid's Hideaway", ("B", 13))],
+    "Old Faithful Isle": [("Old Faithful Isle", ("M", 4))],
+    "Plunder Valley": [("Plunder Valley", ("G", 16))],
+    "Ruby's Fall": [("Ruby's Fall", ("Y", 16))],
+    "Sailor's Bounty": [("Sailor's Bounty", ("C", 4))],
+    "Shark Bait Cove": [("Shark Bait Cove", ("H", 19))],
+    "Shipwreck Bay": [("Shipwreck Bay", ("M", 10))],
+    "Smugglers' Bay": [("Smugglers' Bay", ("F", 3))],
+    "Snake Island": [("Snake Island", ("K", 16))],
+    "The Crooked Masts": [("The Crooked Masts", ("O", 11))],
+    "The Devil's Thirst": [("The Devil's Thirst", ("W", 21))],
+    "The Sunken Grove": [("The Sunken Grove", ("P", 7))],
+    "Thieves' Haven": [("Thieves' Haven", ("L", 20))],
+    "Wanderers Refuge": [("Wanderers Refuge", ("F", 12))],
+    "Hidden Spring Keep": [("Hidden Spring Keep", ("I", 8))],
+    "Keel Haul Fort": [("Keel Haul Fort", ("C", 6))],
+    "Kraken Watchtower": [("Kraken Watchtower", ("L", 6))],
+    "Lost Gold Fort": [("Lost Gold Fort", ("H", 17))],
+    "Molten Sands Fortress": [("Molten Sands Fortress", ("Z", 11))],
+    "Old Boot Fort": [("Old Boot Fort", ("L", 14))],
+    "Sailor's Knot Stronghold": [("Sailor's Knot Stronghold", ("E", 14))],
+    "Shark Fin Camp": [("Shark Fin Camp", ("P", 5))],
+    "Skull Keep": [("Skull Keep", ("P", 9))],
+    "The Crow's Nest Fortress": [("The Crow's Nest Fortress", ("O", 17))]
+}
+ #Every Island and their coordinates
+
 # Helper functions
+
 def convert_coordinates_to_location(x, y):
     letter = chr(int(x) + ord('A') - 1)
     number = str(int(y))
@@ -271,6 +376,11 @@ def plot_selected_routes_with_background(routes, background_image_url, destinati
             markersize = 20 if route == fastest_route else 10
             markerwidth = 25 if route == fastest_route else 12
             
+            #Offset 
+            
+            turn_x += 1
+            turn_y += 1
+            
 
             ax.plot(end_loc[0], end_loc[1], marker, markersize = markersize, linewidth = markerwidth)
             ax.text(end_loc[0], end_loc[1], f' {outpost_name} ({end_location_name})', fontsize=12, verticalalignment='top', horizontalalignment='left')
@@ -303,44 +413,76 @@ def plot_selected_routes_with_background(routes, background_image_url, destinati
     plt.clf()  # Clear the figure after plotting
 
 
+def safe_convert_destinations(destinations):
+    converted_destinations = []
+    for item in destinations:
+        try:
+            name, (letter, number) = item  # Ensure each element is a tuple with exactly two items
+            converted_location = (ord(letter) - ord('A') + 1, number)
+            converted_destinations.append((name, converted_location))
+        except (ValueError, TypeError):
+            print(f"Skipping malformed item: {item}")
+    return converted_destinations
 # Streamlit Interface
 st.title("Ship Routing Finder")
 
+X_Coords = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 
+            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
+# Toggle between Destination and Island Categories
+destination_type = st.radio("Choose your target type:", ("Destination", "Island Categories"))
+
 # User Inputs
-X = st.selectbox("Start X Coordinate (Letter)", [chr(ord('A') + i) for i in range(26)])
-Y = st.selectbox("Start Y Coordinate (Number)", list(range(1, 27)))
+X = st.select_slider("Start X Coordinate (Letter)", [chr(ord('A') + i) for i in range(26)], #options = X_Coords
+                     )
+Y = st.select_slider("Start Y Coordinate (Number)", list(range(1, 27)))
 start = (ord(X.upper()) - ord('A') + 1, Y)
 
-S = st.selectbox("Ship Type", ["S", "B", "G"])
-W = st.selectbox("Wind Direction", list(wind_directions.keys()))
-D = st.selectbox("Destination Type", list(Destinations.keys()))
+S = st.select_slider("Ship Type", ["Sloop", "Briggiantine", "Galleon"])
+W = st.select_slider("Wind Direction", list(wind_directions.keys()))
 
-# Ship selection
+if destination_type == "Destination":
+    if 'Destinations' in globals() and Destinations:  # Check if 'Destinations' is defined and not empty
+        D = st.selectbox("Destination Categories", list(Destinations.keys()))
+    else:
+        st.error("Destination data is not available.")
+else:
+    if 'Islands' in globals() and Islands:  # Check if 'Islands' is defined and not empty
+        D = st.selectbox("Specific Islands", list(Islands.keys()))
+    else:
+        st.error("Island data is not available.")
+
+# Later in the code when you use 'D' to access a dictionary
+if D in Destinations:
+    destinations = Destinations[D]
+else:
+    destinations = Islands[D]# Ship selection and Wind Direction
 SHIP = Chosen_SHIP[S]
-
-# Wind Direction
 wind_direction = wind_directions[W]
 
-if D not in Destinations:
-    st.error("Invalid destination type. Please choose a valid destination type.")
-else:
-    destinations = Destinations[D]
-    converted_destinations = [(name, (ord(loc[0]) - ord('A') + 1, loc[1])) for name, loc in destinations]
+#This shit is kinda fucked
 
+
+if D in Destinations:
+    destinations = Destinations[D]
+    converted_destinations = safe_convert_destinations(destinations)
+else:
+    destinations = Islands[D]
+    converted_destinations = safe_convert_destinations(destinations)
     # Find the fastest route
-    fastest_turning_routes = find_fastest_turning_route(start, converted_destinations, wind_direction)
-    FR = fastest_turning_routes[0]
+fastest_turning_routes = find_fastest_turning_route(start, converted_destinations, wind_direction)
+FR = fastest_turning_routes[0]
 
     # Display the fastest route information
-    if FR[6] is None:
-        st.write(f"Fastest Route is a straight line heading {FR[2]} to reach {FR[1]}")
-        st.write(f"Fastest route will take about {FR[0]} minutes")
-    else:
-        st.write(f"Route will take about {FR[0]} minutes to reach {FR[1]}")
-        st.write(f"Head {FR[2]}, turn at {FR[3]} after turning head {FR[6]}")
+if FR[6] is None:
+   st.write(f"Fastest Route is a straight line heading {FR[2]} to reach {FR[1]}")
+   st.write(f"Fastest route will take about {FR[0]} minutes")
+else:
+   st.write(f"Route will take about {FR[0]} minutes to reach {FR[1]}")
+   st.write(f"Head {FR[2]}, turn at {FR[3]} after turning head {FR[6]}")
 
     # Plot with background
 background_image_url = 'https://raw.githubusercontent.com/Worryingcow/SOT_GPS/6002bcfeac691b3611cf3fed59c16ae84215b0cf/images/MAP_NN_NB.png'
-
-st.write("### Fastest Routes Plot with Background")
+st.write("### Fastest Routes Plot with Background") 
 plot_selected_routes_with_background(fastest_turning_routes, background_image_url, D)
+
