@@ -7,6 +7,18 @@ Created on Thu May  9 22:01:25 2024
 
 """
 
+
+import streamlit as st
+import math
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+from PIL import Image
+import urllib.request
+import io
+from urllib.parse import quote
+
+
 #Im updating this to frequently where I dont want to delete and publish a new streamlit app every time I just copy paste new code, 
 #This is V6.3 
 #Major addtions are sliders, stops, and something else I cant remember
