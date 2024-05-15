@@ -24,7 +24,7 @@ from urllib.parse import quote
 #Major addtions are sliders, stops, and something else I cant remember
 
 
-#Stable version with choice
+#Its always saying the fastest route is the first indice in destinations 
 #Final Destination is removed from stop choice
 #I would like to optimize the route, so you can put final destination and all the places you want to go and it tells you the fastest way
 #IE order of stops doesnt matter
