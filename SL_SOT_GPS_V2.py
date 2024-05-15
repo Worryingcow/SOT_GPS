@@ -3,7 +3,7 @@
 """
 Created on Wed May  8 15:24:36 2024
 
-@author: thomasminahan
+@author: WorryingCow
 """
 
 import streamlit as st
