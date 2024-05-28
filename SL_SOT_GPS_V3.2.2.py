@@ -8,6 +8,7 @@ Created on Thu May  9 22:01:25 2024
 """
 
 
+
 import streamlit as st
 import math
 import matplotlib.pyplot as plt
@@ -19,15 +20,9 @@ import io
 from urllib.parse import quote
 
 
-#Im updating this to frequently where I dont want to delete and publish a new streamlit app every time I just copy paste new code, 
-#This is V6.3 
-#Major addtions are sliders, stops, and something else I cant remember
-
-
-#Its always saying the fastest route is the first indice in destinations 
-#Final Destination is removed from stop choice
-#I would like to optimize the route, so you can put final destination and all the places you want to go and it tells you the fastest way
-#IE order of stops doesnt matter
+#Stable version with choice
+#SLiders have been added
+#this is the last version that actually works
 
 
 # Ship Speed DataFrame
@@ -174,7 +169,6 @@ Islands = {
     "Paradise Spring": [("Paradise Spring", ("L", 17))],
     "Picaroon Palms": [("Picaroon Palms", ("I", 4))],
     "Plunderer's Plight": [("Plunderer's Plight", ("Q", 6))],
-    "Port Merrick": [ ("Port Merrick", ("D", 10))],
     "Rapier Cay": [("Rapier Cay", ("D", 8))],
     "Roaring Sands": [("Roaring Sands", ("U", 21))],
     "Rum Runner Isle": [("Rum Runner Isle", ("H", 9))],
@@ -354,105 +348,84 @@ def load_image_from_url(url):
         st.error(f"Error loading the background image: {e}")
         return None
 
-
-
-# Function to plot routes with background including stops
-def plot_selected_routes_with_background(routes, background_image_url, stops, destination_type, title_prefix="Fastest route to"):
-    # Load the background image from the URL
+def plot_selected_routes_with_background(routes, background_image_url, destination_type, title_prefix="Fastest route to"):
     background = load_image_from_url(background_image_url)
     if background is None:
         return
 
-
-
-    # Create a figure and axis with a fixed aspect ratio
     fig, ax = plt.subplots(figsize=(10, 10))
     ax.set_aspect('equal')
-
-    # Display the background image
-    ax.imshow(background, extent=[1, 27, 1, 27])
-
-    # Plot the starting point with a blue dot and label
+    ax.imshow(background, extent=[1, 27, 1, 27])  # Set the extent of the image
     ax.plot(start[0], start[1], 'bo')
     ax.text(start[0], start[1], ' Start', fontsize=12, verticalalignment='bottom', horizontalalignment='right')
-
-    # Set x and y ticks to represent the grid
     ax.set_xticks(range(1, 27))
     ax.set_xticklabels([chr(ord('A') + i) for i in range(26)], fontsize=10)  # Label x-axis with letters A-Z
     ax.set_yticks(range(1, 27))
     ax.set_yticklabels(range(1, 27), fontsize=10)
+
     ax.grid(True)
 
-    # Plot stops with red dots and labels
-    for stop_name, stop_coord in stops:
-        stop_x, stop_y = stop_coord
-        ax.plot(stop_x, stop_y, 'ro')  # Red dot for stops
-        ax.text(stop_x, stop_y, f' {stop_name} ({chr(ord("A") + stop_x - 1)}, {stop_y})', fontsize=12, verticalalignment='top', horizontalalignment='left')
-
-    # Determine the fastest route from the list of routes
     fastest_route = min(routes, key=lambda route: route[0]) if routes else None
 
-    # Collect all coordinates for the fastest route
-    if fastest_route:
-        all_coords = [start]  # Start with the initial point
-        route_island_names = []
-        for route in routes:
-            time_to_outpost, outpost_name, direction_pre_turn, end_location_name, fastest_turn_original, fastest_turn, fastest_turn_direction = route
-            end_loc = (ord(end_location_name[0]) - ord('A') + 1, int(end_location_name[1]))
+    for route in routes:
+        time_to_outpost, outpost_name, direction_pre_turn, end_location_name, fastest_turn_original, fastest_turn, fastest_turn_direction = route
+        end_loc = (ord(end_location_name[0]) - ord('A') + 1, int(end_location_name[1]))
 
-            if fastest_turn_original:
-                turn_x, turn_y = fastest_turn_original
-                all_coords.append((turn_x, turn_y))  # Append turning point coordinates
-                route_island_names.append((f'Turn ({turn_x},{turn_y})', (turn_x, turn_y)))
-            all_coords.append(end_loc)  # Append destination coordinates
-            route_island_names.append((outpost_name, end_loc))
+        if fastest_turn_original:
+            # Plot the turning route
+            turn_x, turn_y = fastest_turn_original
+            
+            marker = "g*" if route == fastest_route else "ko"
+            markersize = 20 if route == fastest_route else 10
+            markerwidth = 25 if route == fastest_route else 12
+            
+            #Offset 
+            
+            turn_x += 1
+            turn_y += 1
+            
 
-        # Extract x and y coordinates for plotting
-        x_coords, y_coords = zip(*all_coords)
+            ax.plot(end_loc[0], end_loc[1], marker, markersize = markersize, linewidth = markerwidth)
+            ax.text(end_loc[0], end_loc[1], f' {outpost_name} ({end_location_name})', fontsize=12, verticalalignment='top', horizontalalignment='left')
+            line_style_turn = 'g--' if route == fastest_route else 'k--'
+            line_style_final = 'g-' if route == fastest_route else 'k-'
+            linewidth_turn = 5 if route == fastest_route else 1
+            linewidth_final = 5 if route == fastest_route else 1
+            color_turn_point = 'go' if route == fastest_route else 'ko'
 
+            ax.plot([start[0], turn_x], [start[1], turn_y], line_style_turn, linewidth=linewidth_turn)
+            ax.plot([turn_x, end_loc[0]], [turn_y, end_loc[1]], line_style_final, linewidth=linewidth_final)
+            ax.plot(turn_x, turn_y, color_turn_point)
+            ax.text(turn_x, turn_y, f' Turn ({fastest_turn})', fontsize=10, verticalalignment='bottom', horizontalalignment='right')
+        else:
+            # Plot the straight-line route
+            marker = "g*" if route == fastest_route else "ko"
+            markersize = 20 if route == fastest_route else 9
+            markerwidth = 25 if route == fastest_route else 12
+            ax.plot(end_loc[0], end_loc[1], marker, markersize = markersize, linewidth = markerwidth)
+            ax.text(end_loc[0], end_loc[1], f' {outpost_name} ({end_location_name})', fontsize=12, verticalalignment='top', horizontalalignment='left')
+            line_style_final = 'g-' if route == fastest_route else 'k-'
+            linewidth_final = 5 if route == fastest_route else 1
+            ax.plot([start[0], end_loc[0]], [start[1], end_loc[1]], line_style_final, linewidth=linewidth_final)
 
-#Green line and dots appear on top of others if plot after
-        # Plot the fastest route as a single continuous path with a green line and arrows for direction
-        for i in range(len(x_coords) - 1):
-            ax.plot([x_coords[i], x_coords[i + 1]], [y_coords[i], y_coords[i + 1]], 'g-', linewidth=3)
-            ax.arrow(x_coords[i], y_coords[i], x_coords[i + 1] - x_coords[i], y_coords[i + 1] - y_coords[i],
-                     head_width=0.5, head_length=0.5, fc='green', ec='green')
-
-        # Label the islands on the fastest route
-        for (label, (x, y)) in route_island_names:
-            ax.plot(x, y, 'go', markersize=1)  # Mark each point along the fastest route
-            ax.text(x, y, f' {label} ({chr(ord("A") + x - 1)}, {y})', fontsize=12, verticalalignment='top', horizontalalignment='left')
-
-
- # Mark the final destination with a red X
-        final_x, final_y = x_coords[-1], y_coords[-1]
-        ax.plot(final_x, final_y, 'rx', markersize=13, mew=3)  # Red X for final destination
-        ax.text(final_x, final_y, f' {route_island_names[-1][0]} ({chr(ord("A") + final_x - 1)}, {final_y})', fontsize=12, verticalalignment='top', horizontalalignment='left')
-
-
-    # Add wind direction arrow in the bottom right corner #Im honestly not a fan of this
-  #  wind_direction_angle = wind_directions[W]
- #   wind_x = 3  # Adjust position as needed
- #   wind_y = 26  # Adjust position as needed
- #   ax.arrow(wind_x, wind_y, 2 * math.cos(math.radians(wind_direction_angle)), 2 * math.sin(math.radians(wind_direction_angle)),
- #            head_width=0.5, head_length=1, fc='black', ec='black', linewidth = 5)
-  #  ax.text(wind_x + 1, wind_y- 1, f'Wind Direction: {W}', fontsize=12, color='black', verticalalignment='top', horizontalalignment='center')
-
-    # Set axis labels and title
     ax.set_xlabel('X Coordinate', fontsize=14)
     ax.set_ylabel('Y Coordinate', fontsize=14)
     ax.set_title(f"{title_prefix} {destination_type}", fontsize=16)
-
-    # Invert y-axis to match the grid layout
     ax.invert_yaxis()  # Invert only the grid's y-axis, not the background image
-
-    # Display the plot in Streamlit
     st.pyplot(plt.gcf())
-
-    # Clear the figure after plotting
-    plt.clf()
+    plt.clf()  # Clear the figure after plotting
 
 
+def safe_convert_destinations(destinations):
+    converted_destinations = []
+    for item in destinations:
+        try:
+            name, (letter, number) = item  # Ensure each element is a tuple with exactly two items
+            converted_location = (ord(letter) - ord('A') + 1, number)
+            converted_destinations.append((name, converted_location))
+        except (ValueError, TypeError):
+            print(f"Skipping malformed item: {item}")
+    return converted_destinations
 # Streamlit Interface
 st.title("Ship Routing Finder")
 
@@ -463,99 +436,56 @@ X_Coords = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
 destination_type = st.radio("Choose your target type:", ("Island Categories", "Specific Island"))
 
 # User Inputs
-X = st.select_slider("Start X Coordinate (Letter)", [chr(ord('A') + i) for i in range(26)])
+X = st.select_slider("Start X Coordinate (Letter)", [chr(ord('A') + i) for i in range(26)], #options = X_Coords
+                     )
 Y = st.select_slider("Start Y Coordinate (Number)", list(range(1, 27)))
 start = (ord(X.upper()) - ord('A') + 1, Y)
 
 S = st.select_slider("Ship Type", ["Sloop", "Briggiantine", "Galleon"])
 W = st.select_slider("Wind Direction", list(wind_directions.keys()))
 
-# Ensure the final destination is appended correctly
 if destination_type == "Island Categories":
     if 'Destinations' in globals() and Destinations:  # Check if 'Destinations' is defined and not empty
         D = st.selectbox("Destination Categories", list(Destinations.keys()))
-        final_destination = (ord(Destinations[D][0][1][0]) - ord('A') + 1, Destinations[D][0][1][1])
-        final_destination_name = Destinations[D][0][0]
     else:
         st.error("Destination data is not available.")
 else:
     if 'Islands' in globals() and Islands:  # Check if 'Islands' is defined and not empty
         D = st.selectbox("Specific Islands", list(Islands.keys()))
-        final_destination = (ord(Islands[D][0][1][0]) - ord('A') + 1, Islands[D][0][1][1])
-        final_destination_name = Islands[D][0][0]
     else:
         st.error("Island data is not available.")
 
-# Remove the final destination from the list of stops
-filtered_destinations = {key: val for key, val in Destinations.items() if key != D}
-filtered_islands = {key: val for key, val in Islands.items() if key != D}
-
-# Add Stops
-num_stops = st.number_input("Number of Stops", min_value=0, max_value=5, value=0)
-stops = []
-stop_names = []
-for i in range(num_stops):
-    stop_type = st.radio(f"Stop {i+1} Type", ("Island Categories", "Specific Island"), key=f"stop_type_{i}")
-    if stop_type == "Island Categories":
-        stop_category = st.selectbox(f"Stop {i+1} Category", list(filtered_destinations.keys()), key=f"stop_category_{i}")
-        stops.append((ord(filtered_destinations[stop_category][0][1][0]) - ord('A') + 1, filtered_destinations[stop_category][0][1][1]))
-        stop_names.append(filtered_destinations[stop_category][0][0])
-    else:
-        stop_island = st.selectbox(f"Stop {i+1} Island", list(filtered_islands.keys()), key=f"stop_island_{i}")
-        stops.append((ord(filtered_islands[stop_island][0][1][0]) - ord('A') + 1, filtered_islands[stop_island][0][1][1]))
-        stop_names.append(filtered_islands[stop_island][0][0])
-
-route_points = [start] + stops + [final_destination]
-destination_names = ["Start"] + stop_names + [final_destination_name]
-
-# Function to find the fastest route with stops
-def find_fastest_route_with_stops(route_points, destination_names, wind_direction):
-    total_time = 0
-    detailed_route = []
-    
-    for i in range(len(route_points) - 1):
-        start_point = route_points[i]
-        end_point = route_points[i + 1]
-        end_name = destination_names[i + 1]
-        
-        # Find the fastest route between current point and next point
-        destinations = [(end_name, end_point)]
-        fastest_turning_routes = find_fastest_turning_route(start_point, destinations, wind_direction)
-        fastest_route = fastest_turning_routes[0]
-        
-        total_time += fastest_route[0]
-        detailed_route.append((fastest_route[0], end_name, fastest_route[2], fastest_route[3], fastest_route[4], fastest_route[5], fastest_route[6]))
-    
-    return total_time, detailed_route
-
-# Find the fastest route with stops
+# Later in the code when you use 'D' to access a dictionary
+if D in Destinations:
+    destinations = Destinations[D]
+else:
+    destinations = Islands[D]# Ship selection and Wind Direction
 SHIP = Chosen_SHIP[S]
 wind_direction = wind_directions[W]
-total_time_with_stops, detailed_route_with_stops = find_fastest_route_with_stops(route_points, destination_names, wind_direction)
 
-# Calculate the travel time without stops for comparison
-route_points_without_stops = [start, final_destination]
-destination_names_without_stops = ["Start", final_destination_name]
-total_time_without_stops, _ = find_fastest_route_with_stops(route_points_without_stops, destination_names_without_stops, wind_direction)
+#This shit is kinda fucked
 
-# Display the total route information
-st.write(f"Total travel time is about {total_time_with_stops} minutes")
 
-for i, route in enumerate(detailed_route_with_stops):
-    if route[6] is None:
-        st.write(f" Head {route[2]} to reach {route[1]}")
-    else:
-        st.write(f"leg {i+1}  will take about {route[0]} minutes to reach {route[1]}")
-        st.write(f"Head {route[2]}, turn at {route[3]} after turning head {route[6]}")
+if D in Destinations:
+    destinations = Destinations[D]
+    converted_destinations = safe_convert_destinations(destinations)
+else:
+    destinations = Islands[D]
+    converted_destinations = safe_convert_destinations(destinations)
+    # Find the fastest route
+fastest_turning_routes = find_fastest_turning_route(start, converted_destinations, wind_direction)
+FR = fastest_turning_routes[0]
 
-# Calculate and display the additional time added by each stop
-if num_stops > 0:
-    additional_time = total_time_with_stops - total_time_without_stops
-    st.write(f"Stop adds about {additional_time} minutes")
+    # Display the fastest route information
+if FR[6] is None:
+   st.write(f"Fastest Route is a straight line heading {FR[2]} to reach {FR[1]}")
+   st.write(f"Fastest route will take about {FR[0]} minutes")
+else:
+   st.write(f"Route will take about {FR[0]} minutes to reach {FR[1]}")
+   st.write(f"Head {FR[2]}, turn at {FR[3]} after turning head {FR[6]}")
 
-# Plot with background
+    # Plot with background
 background_image_url = 'https://raw.githubusercontent.com/Worryingcow/SOT_GPS/6002bcfeac691b3611cf3fed59c16ae84215b0cf/images/MAP_NN_NB.png'
-st.write("### Fastest Routes Plot with Background")
-plot_selected_routes_with_background(detailed_route_with_stops, background_image_url, list(zip(stop_names, stops)), D)
-
+st.write("### Fastest Routes Plot with Background") 
+plot_selected_routes_with_background(fastest_turning_routes, background_image_url, D)
 
